@@ -1,0 +1,27 @@
+[Unit]
+Description=trannergy-mqtt IoT Service
+
+# PartOf=Configures dependencies similar to Requires=,
+# but limited to stopping and restarting of units.
+# When systemd stops or restarts the units listed here,
+# the action is propagated to this unit.
+# After=foo.service
+# Requires=foo.service
+# PartOf=foo.service
+
+Requires=network.target
+After=network.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+Environment="PYTHONPATH=/opt/python/lib"
+Restart=on-failure
+RestartSec=60s
+
+#Type=oneshot
+Type=simple
+ExecStart=/opt/iot/trannergy/trannergy-mqtt.py
+RemainAfterExit=true
+
+[Install]
+WantedBy=network-online.target
