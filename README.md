@@ -11,12 +11,25 @@ Includes Home Assistant MQTT Auto Discovery.
 * `sudo systemctl enable trannery-mqtt`
 * `sudo systemctl start trannergy-mqtt`
 
+The are 2 clients integrated:
+### TCP CLIENT
+* Works with a specific set of wifi enabled inverters
+* You need to have the wifi s/n
+* Ability to read values every few seconds
+
+### LISTEN Client
+(I could not think of a better name)
+* Inverter will broadcast every 5 minutes all parameters
+* You have to configure the inverter; in this example, 192.168.1.48 is my Raspberry Pi
+![configure](trannergy.PNG)
+
 Use
 http://mqtt-explorer.com/
 to test & inspect MQTT messages
 
 ## Requirements
 * paho-mqtt
+* persist-queue
 * python 3.x
 
 Tested under Linux; there is no reason why it does not work under Windows.
