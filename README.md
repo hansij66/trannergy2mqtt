@@ -29,7 +29,6 @@ to test & inspect MQTT messages
 
 ## Requirements
 * paho-mqtt
-* persist-queue
 * python 3.x
 
 Tested under Linux; there is no reason why it does not work under Windows.
