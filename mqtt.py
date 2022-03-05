@@ -28,7 +28,7 @@
 
 """
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __author__  = "Hans IJntema"
 __license__ = "GPLv3"
 
@@ -154,6 +154,10 @@ class mqttclient(threading.Thread):
     self.__queue = queue.Queue(maxsize = self.__maxqueuesize)
     self.__mqtt.username_pw_set(username, password)
 
+    self.__status_topic = None
+    self.__status_payload = None
+    self.__status_retain = None
+
 
   def __del__(self):
     logger.info( f">>" )
@@ -197,6 +201,7 @@ class mqttclient(threading.Thread):
     if rc == 0:
       logger.debug( f"Connected: client={client}; userdata={userdata}; flags={flags}; rc={rc}" )
       self.__connected_flag=True
+      self.__set_status()
     else:
       logger.error( f"userdata={userdata}; flags={flags}; rc={rc}; {connack_dict[rc]}" )
       self.__connected_flag=False
@@ -253,6 +258,38 @@ class mqttclient(threading.Thread):
       None
     """
     logger.debug(f"obj={obj}; level={level}; buf={buf}")
+
+
+  def __set_status(self):
+    """
+    Set status
+
+    :param str topic:
+    :param str payload:
+    :param int qos:
+    :param bool retain:
+    :return: None
+    """
+
+    if self.__status_topic is not None:
+      self.do_publish(self.__status_topic, self.__status_payload, self.__status_retain)
+
+  def set_status(self, topic, payload=None, retain=False):
+    """
+    Set status
+    Will store status & resend on a reconnect
+
+    :param str topic:
+    :param str payload:
+    :param bool retain:
+    :return: None
+    """
+
+    self.__status_topic = topic
+    self.__status_payload = payload
+    self.__status_retain = retain
+    self.__set_status()
+
 
 
   def will_set(self, topic, payload=None, qos=0, retain=False):

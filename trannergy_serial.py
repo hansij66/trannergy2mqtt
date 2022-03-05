@@ -1,7 +1,5 @@
-#!/usr/bin/python3
-
 """
-Read trannergy telegrams.
+Read Trannergy telegrams.
 
 
         This program is free software: you can redistribute it and/or modify
@@ -23,7 +21,6 @@ import socket
 import threading
 import time
 import binascii
-#import config as cfg
 
 # Logging
 import __main__
@@ -65,21 +62,8 @@ class TaskReadSerial(threading.Thread):
       self.__stopper.set()
       raise ValueError('Cannot open socks port', listen_address)
 
-
   def __del__(self):
     logger.debug(">>")
-
-
-  def __preprocess(self):
-    """
-    Do nothing for time being
-
-    Returns:
-      None
-    """
-    logger.debug(f">>")
-    pass
-
 
   def __read_serial(self):
     """
@@ -136,9 +120,6 @@ class TaskReadSerial(threading.Thread):
       else:
         logger.debug(f"Data received with insufficient content - restart read loop {len(hexdata)}")
         continue
-
-      # do some magic on telegram
-      self.__preprocess()
 
       # Trigger that new telegram is available for MQTT
       logger.debug("Set trigger")

@@ -52,30 +52,27 @@ class ParseTelegrams(threading.Thread):
     self.__mqtt = mqtt
     self.__prevjsondict = {}
 
-
   def __del__(self):
     logger.debug(">>")
 
-
   def __publish_telegram(self, json_dict):
-    # publish the dictionaries per topic
+    """
+    publish the dictionary content
+
+    :param json_dict:
+    :return:
+    """
 
     # make resilient against double forward slashes in topic
     topic = cfg.MQTT_TOPIC_PREFIX
     topic = topic.replace('//', '/')
-    message = json.dumps(json_dict, sort_keys=True, separators=(',',':'))
+    message = json.dumps(json_dict, sort_keys=True, separators=(',', ':'))
     self.__mqtt.do_publish(topic, message, retain=False)
-
-
-  def __decode_telegram_element(self, index, element, ts, listofjsondicts):
-    # logger.debug(f">> index={index};  element={element}")
-    pass
-
 
   def __decode_telegrams(self, telegram):
     """
     Args:
-      :param list telegram:
+      :param list telegram: counter and actual data
 
     Returns:
 
@@ -93,7 +90,7 @@ class ParseTelegrams(threading.Thread):
 
     # Convert from binary and remove first character
     # offset...deepcopy causes this or adding to a list; not sure why.
-    offset=2
+    offset = 2
 
     # Build a dict of key:value, for MQTT JSON
     values["timestamp"] = ts
@@ -102,13 +99,12 @@ class ParseTelegrams(threading.Thread):
     if cfg.INFLUXDB:
       values["database"] = cfg.INFLUXDB
 
-
     # Reference
     # https://github.com/XtheOne/Inverter-Data-Logger/blob/master/InverterMsg.py
     # Current Trannergy is one phase system
     # For 3 phase, uncomment
-    values["msg"] = hexdata[24+offset:28+offset] #new
-    values["serial"] = binascii.unhexlify(hexdata[30 + offset:60 + offset]).decode('utf-8')
+    values["msg"] = hexdata[24+offset:28+offset]
+    values["serial"] = binascii.unhexlify(hexdata[30 + offset:62 + offset]).decode('utf-8')
     values["temperature"] = float(int(hexdata[62+offset:66+offset], 16)) / 10.0
     values["v_pv1"] = float(int(hexdata[66+offset:70+offset], 16)) / 10.0
     values["v_pv2"] = float(int(hexdata[70+offset:74+offset], 16)) / 10.0
@@ -164,10 +160,8 @@ class ParseTelegrams(threading.Thread):
 #    22: 101,  # main_fwver(101)
 #    23: 121, }  # slave_fwver(121)
 
-
     logger.debug(f"Received values = {values}")
     self.__publish_telegram(values)
-
 
   def run(self):
     logger.debug(">>")

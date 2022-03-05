@@ -15,6 +15,12 @@
 V1.0.0:
   - Initial version
 
+V1.1.0
+  - Extend with high(er) frequent read out via tcpclient
+  inspired by: https://github.com/jbouwh/omnikdatalogger/blob/dev/apps/omnikdatalogger/omnik/plugin_client/tcpclient.py
+
+V1.2.0
+  - Enabled homeassistant autodiscovery
 
         This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
@@ -30,7 +36,7 @@ V1.0.0:
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.2.2"
 __author__  = "Hans IJntema"
 __license__ = "GPLv3"
 
@@ -44,8 +50,10 @@ import threading
 import config as cfg
 import trannergy_serial as trannergy
 import trannergy_parser as convert
-#import hadiscovery as ha
+import hadiscovery as ha
 import mqtt as mqtt
+
+import trannergy_tcpclient as tcpclient
 
 from log import logger
 logger.setLevel(cfg.loglevel)
@@ -102,16 +110,30 @@ t_mqtt = mqtt.mqttclient(cfg.MQTT_BROKER,
                          mqtt_stopper,
                          threads_stopper)
 
-# SerialPort thread
 telegram = list()
-t_serial = trannergy.TaskReadSerial(trigger, threads_stopper, telegram)
+
+# Select which reader will be used; setup SerialPort thread
+try:
+  if cfg.INV_READER == "TCPCLIENT":
+    t_serial = tcpclient.TaskReadSerial(trigger, threads_stopper, telegram)
+  elif cfg.INV_READER == "LISTEN":
+    t_serial = trannergy.TaskReadSerial(trigger, threads_stopper, telegram)
+  else:
+    logger.error(f"Wrong READER specified {cfg.INV_READER}")
+    threads_stopper.set()
+    t_serial = None
+except Exception as e:
+  logger.debug(f"Exception {e}")
+  threads_stopper.set()
+  t_serial = None
+  close(1)
+
 
 # Telegram parser thread
 t_parse = convert.ParseTelegrams(trigger, threads_stopper, t_mqtt, telegram)
 
 # Send Home Assistant auto discovery MQTT's
-#t_discovery = ha.Discovery(threads_stopper, t_mqtt, __version__)
-
+t_discovery = ha.Discovery(threads_stopper, t_mqtt, __version__)
 
 def exit_gracefully(signal, stackframe):
   """
@@ -137,11 +159,12 @@ def main():
   # Start all threads
   t_mqtt.start()
   t_parse.start()
-  #t_discovery.start()
+  t_discovery.start()
   t_serial.start()
 
   # Set status to online
-  t_mqtt.do_publish(cfg.MQTT_TOPIC_PREFIX + "/status", "online", retain=True)
+  t_mqtt.set_status(cfg.MQTT_TOPIC_PREFIX + "/status", "online", retain=True)
+  t_mqtt.do_publish(cfg.MQTT_TOPIC_PREFIX + "/sw-version", f"{__version__}", retain=True)
 
   # block till t_serial stops receiving telegrams/exits
   t_serial.join()
@@ -149,7 +172,7 @@ def main():
   threads_stopper.set()
 
   # Set status to offline
-  t_mqtt.do_publish(cfg.MQTT_TOPIC_PREFIX + "/status", "offline", retain=True)
+  t_mqtt.set_status(cfg.MQTT_TOPIC_PREFIX + "/status", "offline", retain=True)
 
   # Todo check if MQTT queue is empty before setting stopper
   # Use a simple delay of 1sec before closing mqtt
@@ -158,7 +181,6 @@ def main():
 
   logger.debug("<<" )
   return
-
 
 # ------------------------------------------------------------------------------------
 # Entry point

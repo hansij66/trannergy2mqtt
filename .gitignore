@@ -2,3 +2,8 @@ __pycache__
 venv
 .idea
 notes.txt
+ansible.sh
+config.py
+
+
+inverter_msg.py
