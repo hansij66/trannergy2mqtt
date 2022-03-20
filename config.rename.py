@@ -1,11 +1,11 @@
-#!/usr/bin/python3
-
 """
   Rename to config.py
 
   Configure:
   - MQTT client
   - Debug level
+  - Home Assistant
+  - InfluxDB
 
 """
 

@@ -124,7 +124,7 @@ class ParseTelegrams(threading.Thread):
     # values["p_ac3"] = float(int(hexdata[126:130], 16))
     # unknown = float(int(hexdata[130:134],16))/100
     values["yield_today"] = int(hexdata[138+offset:142+offset], 16) * 10
-    #values["yield_yesterday"] = int(hexdata[134+offset:138+offset], 16) * 10  # not implemented
+    # values["yield_yesterday"] = int(hexdata[134+offset:138+offset], 16) * 10  # not implemented
     values["yield_total"] = int(hexdata[142+offset:150+offset], 16) * 100
     values["hrs_total"] = int(hexdata[150+offset:158+offset], 16)
     values["runstate"] = int(hexdata[158 + offset:160 + offset], 16)

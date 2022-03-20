@@ -28,7 +28,8 @@ import logging
 import os
 script = os.path.basename(__main__.__file__)
 script = os.path.splitext(script)[0]
-logger = logging.getLogger(script + "." +  __name__)
+logger = logging.getLogger(script + "." + __name__)
+
 
 class TaskReadSerial(threading.Thread):
 
@@ -126,7 +127,6 @@ class TaskReadSerial(threading.Thread):
       self.__trigger.set()
 
     logger.debug("<<")
-
 
   def run(self):
     logger.debug(">>")

@@ -18,10 +18,8 @@ Environment="PYTHONPATH=/opt/python/lib"
 Restart=on-failure
 RestartSec=60s
 
-#Type=oneshot
-Type=simple
+Type=idle
 ExecStart=/opt/iot/trannergy/trannergy-mqtt.py
-RemainAfterExit=true
 
 [Install]
 WantedBy=network-online.target

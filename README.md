@@ -8,7 +8,7 @@ Includes Home Assistant MQTT Auto Discovery.
 * Copy `systemd/trannergy-mqtt.service` to `/etc/systemd/system`
 * Adapt path in `trannergy-mqtt.service` to your install location (default: `/opt/iot/trannergy`)
 * Copy `config.rename.py` to `config.py` and adapt for your configuration (minimal: mqtt ip, username, password)
-* `sudo systemctl enable trannery-mqtt`
+* `sudo systemctl enable trannergy-mqtt`
 * `sudo systemctl start trannergy-mqtt`
 
 The are 2 clients integrated:
@@ -37,5 +37,8 @@ Tested under Linux; there is no reason why it does not work under Windows.
 GPL v3
 
 ## Versions
+1.2.4:
+* Fix exit code (SUCCESS vs FAILURE)
+
 1.2.2:
 * Initial version on github
