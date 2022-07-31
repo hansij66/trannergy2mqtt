@@ -44,6 +44,7 @@ INV_SERIAL_LOGGER = 123456780
 # ip address of the i nverter
 INV_IP = "192.168.1.53"
 INV_TCPCLIENTPORT = 8899
+INV_MAXRETRIES = 60
 
 # NROF parameter reads from inverter per hour (60 equals every minute); only when INV_READER="TCPCLIENT"
 INV_READ_RATE = 60
@@ -51,6 +52,8 @@ INV_READ_RATE = 60
 # Select one of the two available readers
 # If supported: can read high(er) frequent all inverter parameters --> INV_READ_RATE
 INV_READER="TCPCLIENT"
+
+
 
 # Inverter sends every 5 minutes an update of all parameters
 # When starting this script....be patient at least for 5minutes

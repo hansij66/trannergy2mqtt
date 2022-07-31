@@ -37,6 +37,9 @@ Tested under Linux; there is no reason why it does not work under Windows.
 GPL v3
 
 ## Versions
+1.2.5:
+* Exit after maxretries to connect to inverter
+
 1.2.4:
 * Fix exit code (SUCCESS vs FAILURE)
 

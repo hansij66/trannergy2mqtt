@@ -62,6 +62,9 @@ class TaskReadSerial(threading.Thread):
     Create socket/connection to inverter
     """
 
+    # Exit after too many attempts
+    counter = 0
+
     while not self.__stopper.is_set():
       try:
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -70,6 +73,9 @@ class TaskReadSerial(threading.Thread):
       except Exception as e:
         logger.info(f"Read SOCKS: {type(e).__name__}: {str(e)}")
         time.sleep(30)
+        counter += 1
+        if counter > cfg.INV_MAXRETRIES:
+          self.__stopper.set()
 
   def __request_string(self, ser):
     """
