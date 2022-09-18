@@ -36,7 +36,7 @@ V1.2.0
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__version__ = "1.2.5"
+__version__ = "1.2.6"
 __author__ = "Hans IJntema"
 __license__ = "GPLv3"
 

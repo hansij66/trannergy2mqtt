@@ -70,12 +70,20 @@ class TaskReadSerial(threading.Thread):
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__sock.connect((cfg.INV_IP, cfg.INV_TCPCLIENTPORT))
         return
+      except OSError as e:
+        logger.error(f"Socket Exception OSError: {type(e).__name__}: {str(e)}; set stopper")
+        self.__stopper.set()
+        return
+
       except Exception as e:
-        logger.info(f"Read SOCKS: {type(e).__name__}: {str(e)}")
-        time.sleep(30)
         counter += 1
+        logger.info(f"Socket Exception: {type(e).__name__}: {str(e)}; counter = {counter}")
+        time.sleep(30)
+
         if counter > cfg.INV_MAXRETRIES:
+          logger.error(f"Socket MAX_RETRIES exceeded. set stopper")
           self.__stopper.set()
+        return
 
   def __request_string(self, ser):
     """
