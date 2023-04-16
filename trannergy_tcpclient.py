@@ -70,11 +70,12 @@ class TaskReadSerial(threading.Thread):
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__sock.connect((cfg.INV_IP, cfg.INV_TCPCLIENTPORT))
         return
+      #except socket.error as e:
+      #https://instructobit.com/tutorial/101/Reconnect-a-Python-socket-after-it-has-lost-its-connection
+      #https://zditect.com/code/python/reconnect-a-python-socket-after-it-has-lost-its-connection--------.html
       except OSError as e:
         logger.error(f"Socket Exception OSError: {type(e).__name__}: {str(e)}; set stopper")
         self.__stopper.set()
-        return
-
       except Exception as e:
         counter += 1
         logger.info(f"Socket Exception: {type(e).__name__}: {str(e)}; counter = {counter}")
@@ -83,7 +84,8 @@ class TaskReadSerial(threading.Thread):
         if counter > cfg.INV_MAXRETRIES:
           logger.error(f"Socket MAX_RETRIES exceeded. set stopper")
           self.__stopper.set()
-        return
+
+    return
 
   def __request_string(self, ser):
     """

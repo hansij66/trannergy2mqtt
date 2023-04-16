@@ -22,10 +22,6 @@ MQTT_QOS = 1
 MQTT_USERNAME = "username"
 MQTT_PASSWORD = "secret"
 
-# Max nrof MQTT messages per second transmitted by MQTT client
-# Set to 0 for unlimited rate
-MQTT_RATE = 100
-
 MQTT_TOPIC_PREFIX = "solar/trannergy/roof_w"
 
 # [ InfluxDB ]

@@ -34,9 +34,12 @@ V1.2.0
 
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  v1.3.0
+  - Update vor mqtt lib v5
 """
 
-__version__ = "1.2.6"
+__version__ = "1.3.0"
 __author__ = "Hans IJntema"
 __license__ = "GPLv3"
 
@@ -99,44 +102,45 @@ def close():
 # LATE GLOBALS
 # ------------------------------------------------------------------------------------
 trigger = threading.Event()
-threads_stopper = threading.Event()
-mqtt_stopper = threading.Event()
+t_threads_stopper = threading.Event()
+t_mqtt_stopper = threading.Event()
 
 # mqtt thread
-t_mqtt = mqtt.mqttclient(cfg.MQTT_BROKER,
-                         cfg.MQTT_PORT,
-                         cfg.MQTT_CLIENT_UNIQ,
-                         cfg.MQTT_RATE,
-                         cfg.MQTT_QOS,
-                         cfg.MQTT_USERNAME,
-                         cfg.MQTT_PASSWORD,
-                         mqtt_stopper,
-                         threads_stopper)
+t_mqtt = mqtt.MQTTClient(mqtt_broker=cfg.MQTT_BROKER,
+                         mqtt_port=cfg.MQTT_PORT,
+                         mqtt_client_id=cfg.MQTT_CLIENT_UNIQ,
+                         mqtt_qos=cfg.MQTT_QOS,
+                         mqtt_cleansession=True,
+                         mqtt_protocol=mqtt.MQTTv5,
+                         username=cfg.MQTT_USERNAME,
+                         password=cfg.MQTT_PASSWORD,
+                         mqtt_stopper=t_mqtt_stopper,
+                         worker_threads_stopper=t_threads_stopper)
 
 telegram = list()
 
 # Select which reader will be used; setup SerialPort thread
 try:
   if cfg.INV_READER == "TCPCLIENT":
-    t_serial = tcpclient.TaskReadSerial(trigger, threads_stopper, telegram)
+    t_serial = tcpclient.TaskReadSerial(trigger, t_threads_stopper, telegram)
   elif cfg.INV_READER == "LISTEN":
-    t_serial = trannergy.TaskReadSerial(trigger, threads_stopper, telegram)
+    t_serial = trannergy.TaskReadSerial(trigger, t_threads_stopper, telegram)
   else:
     logger.error(f"Wrong READER specified {cfg.INV_READER}")
-    threads_stopper.set()
+    t_threads_stopper.set()
     t_serial = None
 except Exception as e:
   logger.debug(f"Exception {e}")
-  threads_stopper.set()
+  t_threads_stopper.set()
   t_serial = None
   close(1)
 
 
 # Telegram parser thread
-t_parse = convert.ParseTelegrams(trigger, threads_stopper, t_mqtt, telegram)
+t_parse = convert.ParseTelegrams(trigger, t_threads_stopper, t_mqtt, telegram)
 
 # Send Home Assistant auto discovery MQTT's
-t_discovery = ha.Discovery(threads_stopper, t_mqtt, __version__)
+t_discovery = ha.Discovery(t_threads_stopper, t_mqtt, __version__)
 
 def exit_gracefully(signal, stackframe):
   """
@@ -153,7 +157,7 @@ def exit_gracefully(signal, stackframe):
   # status=0/SUCCESS
   __exit_code = 0
 
-  threads_stopper.set()
+  t_threads_stopper.set()
   logger.info("<<")
 
 
@@ -171,12 +175,12 @@ def main():
 
   # Set status to online
   t_mqtt.set_status(cfg.MQTT_TOPIC_PREFIX + "/status", "online", retain=True)
-  t_mqtt.do_publish(cfg.MQTT_TOPIC_PREFIX + "/sw-version", f"{__version__}", retain=True)
+  t_mqtt.do_publish(cfg.MQTT_TOPIC_PREFIX + "/sw-version", f"main={__version__}; mqtt={mqtt.__version__}", retain=True)
 
   # block till t_serial stops receiving telegrams/exits
   t_serial.join()
   logger.debug("t_serial.join exited; set stopper for other threats")
-  threads_stopper.set()
+  t_threads_stopper.set()
 
   # Set status to offline
   t_mqtt.set_status(cfg.MQTT_TOPIC_PREFIX + "/status", "offline", retain=True)
@@ -184,7 +188,7 @@ def main():
   # Todo check if MQTT queue is empty before setting stopper
   # Use a simple delay of 1sec before closing mqtt
   time.sleep(1)
-  mqtt_stopper.set()
+  t_mqtt_stopper.set()
 
   logger.debug("<<" )
   return
