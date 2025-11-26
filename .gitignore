@@ -4,6 +4,6 @@ venv
 notes.txt
 ansible.sh
 config.py
-
+tests
 
 inverter_msg.py
