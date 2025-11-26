@@ -34,6 +34,26 @@ logger = logging.getLogger(script + "." + __name__)
 
 class ParseTelegrams(threading.Thread):
   """
+  Manages parsing and processing of Trannergy inverter telegrams, decoding their
+  contents, and publishing the results. Operates as a thread that continuously
+  listens for and processes incoming data until instructed to stop.
+
+  The class is designed to work with a Trannergy inverter's telemetry, decoding the
+  hexadecimal data format used and extracting system telemetry such as voltage,
+  current, power, operational state, and more. Data is then published via MQTT to
+  a specified topic for further use. The class relies on user-defined triggers and
+  stoppers to control the flow of data processing and overall lifecycle of the thread.
+
+  :ivar __trigger: Event signaling the availability of a new telegram for processing.
+  :type __trigger: threading.Event
+  :ivar __stopper: Event used to indicate when the thread should terminate execution.
+  :type __stopper: threading.Event
+  :ivar __mqtt: Reference to the MQTT worker used for data publication.
+  :type __mqtt: mqtt.MQTTClient
+  :ivar __telegram: Container holding the current telegram data to be decoded and published.
+  :type __telegram: list
+  :ivar __prevjsondict: Internal tracking dictionary for previously published data.
+  :type __prevjsondict: dict
   """
 
   def __init__(self, trigger, stopper, mqtt, telegram):
@@ -71,11 +91,16 @@ class ParseTelegrams(threading.Thread):
 
   def __decode_telegrams(self, telegram):
     """
-    Args:
-      :param list telegram: counter and actual data
+    Decodes a telegram containing hex data for various inverter parameters into a dictionary with human-readable keys and values,
+    applying necessary transformations like decoding, base conversions, and scaling. The decoded values include information about
+    the timestamp, system parameters (e.g., voltage, current, power, operational state), and error states. Logs debug information
+    about the input telegram and parsed data.
 
-    Returns:
+    :param telegram: List containing the input data telegram. The first element represents the counter, while the second element
+        contains the hex-encoded telemetry data.
+    :type telegram: list
 
+    :return: None. The function processes the telegram to extract its meaningful data and publishes it for further use.
     """
     logger.debug(f">>")
     values = dict()
@@ -162,6 +187,8 @@ class ParseTelegrams(threading.Thread):
 
     logger.debug(f"Received values = {values}")
     self.__publish_telegram(values)
+
+    return None
 
   def run(self):
     logger.debug(">>")

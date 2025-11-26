@@ -1,4 +1,2 @@
-paho-mqtt
-# Debian: sudo apt-get install python3-paho-mqtt
-# sudo pip3 install paho-mqtt --user
-
+paho-mqtt > 2.0.0
+pytest

@@ -75,7 +75,8 @@ class Discovery(threading.Thread):
     d = {}
 
     # create device JSON
-    d["name"] = "trannergy inverter"
+#    d["name"] = "trannergy inverter"
+    d["name"] = "status"
     d["unique_id"] = "trannergy-device"
     d["state_topic"] = cfg.MQTT_TOPIC_PREFIX + "/status"
     d["icon"] = "mdi:home-automation"

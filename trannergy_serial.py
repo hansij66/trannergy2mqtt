@@ -85,7 +85,7 @@ class TaskReadSerial(threading.Thread):
       self.__telegram.clear()
 
       # Wait for a connection with Trannergy
-      logger.debug(f"Open socks connection...")
+      logger.debug(f"Accepting inverter socket connection...")
       try:
         conn, addr = self.__sock.accept()
         logger.info(f"Connected to: {str(conn)} {str(addr)}")

@@ -137,7 +137,11 @@ class TaskReadSerial(threading.Thread):
       # Wait for response (listen and block thread)
       rawdata = self.__sock.recv(1024)
 
-      serial = str(rawdata[15:31], encoding="UTF-8")
+      try:
+        serial = str(rawdata[15:31], encoding="UTF-8")
+      except Exception as e:
+        serial = str(rawdata[15:31], encoding="ISO-8859-1")
+
 
       logger.debug(f"SERIAL={serial}")
       if serial != cfg.INV_SERIAL:
