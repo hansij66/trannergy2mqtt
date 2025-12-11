@@ -39,9 +39,11 @@ V1.2.0
   - Update vor mqtt lib v5
   v1.3.1
   - Update mqtt lib
+  v1.3.2
+  - Bug fix
 """
 
-__version__ = "1.3.1
+__version__ = "1.3.2"
 __author__ = "Hans IJntema"
 __license__ = "GPLv3"
 
