@@ -37,7 +37,7 @@ Tested under Linux; there is no reason why it does not work under Windows.
 GPL v3
 
 ## Versions
-1.4.0
+1.3.2
 * Update HA Discovery
 * https://github.com/hansij66/dsmr2mqtt/pull/6/commits/4efcda347f406a5a4b731ed7cd727bb626e8463f
 
